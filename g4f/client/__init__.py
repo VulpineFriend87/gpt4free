@@ -84,7 +84,15 @@ def iter_response(
             conversation = chunk
             continue
         elif isinstance(chunk, ToolCalls):
-            tool_calls = chunk.get_list()
+            new_calls = chunk.get_list()
+            if tool_calls is None:
+                tool_calls = new_calls
+            else:
+                for idx, call in enumerate(new_calls):
+                    try:
+                        tool_calls[idx]['function']['arguments'] += call['function']['arguments']
+                    except Exception:
+                        tool_calls[idx] = call
             continue
         elif isinstance(chunk, Usage):
             usage = chunk
@@ -197,7 +205,15 @@ async def async_iter_response(
                 conversation = chunk
                 continue
             elif isinstance(chunk, ToolCalls):
-                tool_calls = chunk.get_list()
+                new_calls = chunk.get_list()
+                if tool_calls is None:
+                    tool_calls = new_calls
+                else:
+                    for idx, call in enumerate(new_calls):
+                        try:
+                            tool_calls[idx]['function']['arguments'] += call['function']['arguments']
+                        except Exception:
+                            tool_calls[idx] = call
                 continue
             elif isinstance(chunk, Usage):
                 usage = chunk
