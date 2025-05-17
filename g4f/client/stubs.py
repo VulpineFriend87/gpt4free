@@ -87,7 +87,8 @@ class ChatCompletionChunk(BaseModel):
         completion_id: str = None,
         created: int = None,
         usage: UsageModel = None,
-        conversation: dict = None
+        conversation: dict = None,
+        tool_calls: list[ToolCallModel] = None
     ):
         return super().model_construct(
             id=f"chatcmpl-{completion_id}" if completion_id else None,
@@ -96,7 +97,7 @@ class ChatCompletionChunk(BaseModel):
             model=None,
             provider=None,
             choices=[ChatCompletionDeltaChoice.model_construct(
-                ChatCompletionDelta.model_construct(content),
+                ChatCompletionDelta.model_construct(content, tool_calls),
                 finish_reason
             )],
             **filter_none(usage=usage, conversation=conversation)
@@ -245,10 +246,11 @@ class ClientResponse(BaseModel):
 class ChatCompletionDelta(BaseModel):
     role: str
     content: Optional[str]
+    tool_calls: list[ToolCallModel] = None
 
     @classmethod
-    def model_construct(cls, content: Optional[str]):
-        return super().model_construct(role="assistant", content=content)
+    def model_construct(cls, content: Optional[str], tool_calls: list[ToolCallModel] = None):
+        return super().model_construct(role="assistant", content=content, **filter_none(tool_calls=tool_calls))
 
     @field_serializer('content')
     def serialize_content(self, content: Optional[str]):

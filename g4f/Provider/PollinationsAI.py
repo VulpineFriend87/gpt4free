@@ -404,6 +404,9 @@ class PollinationsAI(AsyncGeneratorProvider, ProviderModelMixin):
                         if reasoning_content:
                             reasoning = True
                             yield Reasoning(reasoning_content)
+                        tool_calls_delta = choice.get("delta", {}).get("tool_calls")
+                        if tool_calls_delta:
+                            yield ToolCalls(tool_calls_delta)
                         finish_reason = choice.get("finish_reason")
                         if finish_reason:
                             yield FinishReason(finish_reason)

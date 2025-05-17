@@ -114,7 +114,13 @@ def iter_response(
             finish_reason = "stop"
 
         if stream:
-            chunk = ChatCompletionChunk.model_construct(chunk, None, completion_id, int(time.time()))
+            chunk = ChatCompletionChunk.model_construct(
+                chunk,
+                None,
+                completion_id,
+                int(time.time()),
+                tool_calls=[ToolCallModel.model_construct(**tc) for tc in tool_calls] if tool_calls else None
+            )
             if provider is not None:
                 chunk.provider = provider.name
                 chunk.model = provider.model
@@ -132,7 +138,13 @@ def iter_response(
 
     if stream:
         chat_completion = ChatCompletionChunk.model_construct(
-            None, finish_reason, completion_id, int(time.time()), usage=usage
+            None,
+            finish_reason,
+            completion_id,
+            int(time.time()),
+            usage=usage,
+            conversation=None if conversation is None else conversation.get_dict(),
+            tool_calls=[ToolCallModel.model_construct(**tc) for tc in tool_calls] if tool_calls else None
         )
     else:
         if response_format is not None and "type" in response_format:
